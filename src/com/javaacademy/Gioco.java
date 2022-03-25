@@ -18,7 +18,7 @@ public class Gioco {
         this.campoGiocatore = campoGiocatore;
     }
 
-    public Campo.Coordinata leggiCoordinata() {
+    private Coordinata leggiCoordinata() {
         System.out.print("Insersci una coordinata (es. A6, D11, F2): ");
         Scanner sc = new Scanner(System.in);
         String input = sc.nextLine().trim().toUpperCase().replace(" ", "");
@@ -29,13 +29,12 @@ public class Gioco {
                     if (x >= 1 && x <= 10){
                         int y = input.charAt(0) - 64;
 
-                        Campo.Coordinata c = new Campo.Coordinata(x, y);
-                        return c;
+                        return new Coordinata(x, y);
                     } else {
                         System.out.println(x + " non è un numero valido. Inserire un numero tra 1 e 10.");
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println(input.charAt(1) + " non è un numero. Inserire un numero tra 1 e 10." );
+                    System.out.println(input.substring(1) + " non è un numero. Inserire un numero tra 1 e 10." );
                 }
 
             } else {
@@ -47,20 +46,20 @@ public class Gioco {
     }
 
 
-    public void checkCell(Campo.Coordinata c) {
+    private void checkCell(Coordinata c) {
         if (c != null) {
            if(campo.getValoreCampo(c.getX(),c.getY()).equals("-") && campoGiocatore.getValoreCampo(c.getX(),c.getY()).equals((Character.toString((char) 0x25A1)))){
                System.out.println(ANSI_CYAN + "ACQUA!!!" + ANSI_RESET);
                campoGiocatore.setValoreCampo(c.getX(),c.getY(), Character.toString((char) 0x2248));
            } else if (campo.getValoreCampo(c.getX(),c.getY()).equals("+") && campoGiocatore.getValoreCampo(c.getX(),c.getY()).equals((Character.toString((char) 0x25A1)))){
                campoGiocatore.setValoreCampo(c.getX(),c.getY(), "X");
-               Campo.Coordinata[] nave = lunghezzaNave(c,true);
+               Coordinata[] nave = lunghezzaNave(c,true);
                boolean affondata = true;
                if (nave == null) { // La nave non è orizzontale
                    nave = lunghezzaNave(c,false); // Controllo se la nave è verticale
                    //Se è verticale --> controllo le x
 
-                   for (int i = nave[0].getX(); i <= nave[1].getX(); i++) {
+                   for (int i = nave[0].getX(); i <= nave[1].getX() && i > 0; i++) {
                        if (!campoGiocatore.getValoreCampo(i, c.getY()).equals("X")) {
                            affondata = false;
                            break;
@@ -91,69 +90,72 @@ public class Gioco {
         this.mosse++;
     }
 
-    private Campo.Coordinata[] lunghezzaNave(Campo.Coordinata cIniziale, boolean orizzontale) {
+    private Coordinata[] lunghezzaNave(Coordinata cIniziale, boolean orizzontale) {
         int x = cIniziale.getX();
         int y = cIniziale.getY();
 
-        Campo.Coordinata inizioNave = cIniziale;
-        Campo.Coordinata fineNave = cIniziale;
+        Coordinata inizioNave = cIniziale;
+        Coordinata fineNave = cIniziale;
 
 
         if (orizzontale) {
             while (y > 0) {
                 if (!campo.getValoreCampo(x, y).equals("+")) {
-                    inizioNave = new Campo.Coordinata(x, y + 1);
+                    //inizioNave = new Coordinata(x, y + 1);
 
                     break;
                 } else {
                     y--;
                 }
             }
+            inizioNave = new Coordinata(x, y + 1);
             y = cIniziale.getY();
             while (y < 10) {
                 if (!campo.getValoreCampo(x, y).equals("+")) {
-                    fineNave = new Campo.Coordinata(x, y - 1);
+                    //fineNave = new Coordinata(x, y - 1);
 
                     break;
                 } else {
                     y++;
                 }
             }
+            fineNave = new Coordinata(x, y - 1);
 
-            System.out.println("");
         } else {
             while (x > 0) {
                 if (!campo.getValoreCampo(x, y).equals("+")) {
-                    inizioNave = new Campo.Coordinata(x + 1, y);
+                    //inizioNave = new Coordinata(x + 1, y);
 
                     break;
                 } else {
                     x--;
                 }
             }
+            inizioNave = new Coordinata(x + 1, y);
             x = cIniziale.getX();
 
-            while (x < 10) {
+            while (x <= 10) {
 
                 if (!campo.getValoreCampo(x, y).equals("+")) {
-                    fineNave = new Campo.Coordinata(x - 1, y);
+                 //   fineNave = new Coordinata(x - 1, y);
                     break;
                 }  else{
                     x++;
                 }
             }
+            fineNave = new Coordinata(x - 1, y);
         }
 
 
         if (cIniziale.equals(inizioNave) && cIniziale.equals(fineNave)) {
             return null;
         }
-        return new Campo.Coordinata[]{inizioNave, fineNave};
+        return new Coordinata[]{inizioNave, fineNave};
     }
 
     public void run() {
 
-        System.out.println(ANSI_BLUE + "Benvenut" + Character.toString((char) 0x0259) + " a battaglia navale!" + ANSI_RESET);
+        System.out.println(ANSI_BLUE + "Benvenut" + (char) 0x0259 + " a battaglia navale!" + ANSI_RESET);
 
         System.out.println("\nREGOLAMENTO:");
         System.out.println("Devi colpire e affondare " + numeroNavi + " navi.\nLe navi sono di queste dimensioni:");
@@ -167,7 +169,7 @@ public class Gioco {
         this.campoGiocatore.stampaCampo();
 
         while (naviColpite < numeroNavi) {
-            Campo.Coordinata c = leggiCoordinata();
+            Coordinata c = leggiCoordinata();
             if (c != null) {
                 checkCell(c);
                 this.campoGiocatore.stampaCampo();
